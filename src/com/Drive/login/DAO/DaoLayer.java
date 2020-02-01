@@ -1,175 +1,186 @@
-package com.Drive.login.DAO;
-
-import com.Drive.constants.DBCon;
-import com.Drive.constants.constantdb;
-import com.Drive.pojo.Drives;
-import com.Drive.pojo.Employee;
+package com.drivetracker.dao;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import com.drivetracker.constants.DBCon;
+import com.drivetracker.constants.constantdb;
+import com.drivetracker.pojo.Drives;
+import com.drivetracker.pojo.Employee;
 
 public class DaoLayer {
 	public static void setValues(PreparedStatement statement, Object... values) throws SQLException {
-		for (int i = 0; i < values.length; i++) 
-		{
+		for (int i = 0; i < values.length; i++) {
 			statement.setObject(i + 1, values[i]);
 		}
 	}
 
-	public static Map<String, String> addDrive(Drives bk) throws ClassNotFoundException, SQLException {
+	public static Map<String, String> addDrive(Drives dr) {
 		Map<String, String> mp = new HashMap<>();
 
-		int status = 0;
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps = con.prepareStatement(constantdb.STR_Drive);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_Drive);) {
 
-		String cname = bk.getCname();
-		String driveDate = bk.getDriveDate();
-		String position = bk.getPosition();
-		int packageOffered = bk.getPackageOffered();
-		int vacanciesAvailable = bk.getVacanciesAvailable();
-		String location = bk.getLocation();
-		String contactPersonDetails = bk.getContactPersonDetails();
-		String email=bk.getEmail();
+			int status = 0;
+			String cname = dr.getCname();
+			String driveDate = dr.getDriveDate();
+			String position = dr.getPosition();
+			int packageOffered = dr.getPackageOffered();
+			int vacanciesAvailable = dr.getVacanciesAvailable();
+			String location = dr.getLocation();
+			String contactPersonDetails = dr.getContactPersonDetails();
+			String email = dr.getEmail();
 
-		Object[] parameter = { cname, driveDate, position, packageOffered, vacanciesAvailable, location,
-				contactPersonDetails, email };
+			Object[] parameter = { cname, driveDate, position, packageOffered, vacanciesAvailable, location,
+					contactPersonDetails, email };
 
-		setValues(ps, parameter);
+			setValues(ps, parameter);
 
-		status = ps.executeUpdate();
+			status = ps.executeUpdate();
 
-		if (status == 1) {
+			if (status == 1) {
 
-			mp.put("Msg", "successfully");
+				mp.put("Msg", "successfully");
 
-		} else {
-			mp.put("Msg", "Error");
+			} else {
+				mp.put("Msg", "Error");
+			}
+
+		} catch (Exception e) {
 		}
+
 		return mp;
 
 	}
 
-	public static Map<String, String> chklogin(Employee drive) throws SQLException, ClassNotFoundException {
+	public static Map<String, String> chklogin(Employee drive) {
 
 		Map<String, String> mapobject = new HashMap<String, String>();
 
-		ResultSet status = null;
-
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_GETALL);
-
-		status = ps.executeQuery();
-
-		while (status.next()) {
-			if (status.getString(3).equals(drive.getEmail()) && status.getString(4).equals(drive.getPassword())) {
-				mapobject.put("status", "user");
-				break;
-			} else if ("admin@gmail.com".equals(drive.getEmail()) && "admin123".equals(drive.getPassword())) {
-				mapobject.put("status", "admin");
-				break;
-			} else {
-				mapobject.put("status", "Error");
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_GETALL);
+				ResultSet status = ps.executeQuery();) {
+			while (status.next()) {
+				if (status.getString(3).equals(drive.getEmail()) && status.getString(4).equals(drive.getPassword())) {
+					mapobject.put("status", "user");
+					break;
+				} else if ("admin@gmail.com".equals(drive.getEmail()) && "admin123".equals(drive.getPassword())) {
+					mapobject.put("status", "admin");
+					break;
+				} else {
+					mapobject.put("status", "Error");
+				}
 			}
+
+		} catch (Exception e) {
 		}
+
 		return mapobject;
 
 	}
 
-	public static Map<String, String> createlibrarian(Employee lb) throws ClassNotFoundException, SQLException {
+	public static Map<String, String> insertEmployees(Employee emp) {
+
 		Map<String, String> mp = new HashMap<>();
 
-		int status = 0;
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_INSERT);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_INSERT);) {
 
-		String name = lb.getName();
-		String email = lb.getEmail();
-		String password = lb.getPassword();
-		long mobno = lb.getMobno();
+			int status = 0;
 
-		Object[] parameter = { name, email, password, mobno };
+			String name = emp.getName();
+			String email = emp.getEmail();
+			String password = emp.getPassword();
+			long mobno = emp.getMobno();
 
-		setValues(ps, parameter);
+			Object[] parameter = { name, email, password, mobno };
 
-		status = ps.executeUpdate();
+			setValues(ps, parameter);
 
-		if (status == 1) {
+			status = ps.executeUpdate();
 
-			mp.put("Msg", "successfully");
+			if (status == 1) {
 
-		} else {
-			mp.put("Msg", "Error");
+				mp.put("Msg", "successfully");
+
+			} else {
+				mp.put("Msg", "Error");
+			}
+
+		} catch (Exception e) {
+
 		}
 		return mp;
 
 	}
 
-	public static ArrayList<Employee> getDriveListFromDb() throws Exception {
+	public static ArrayList<Employee> getDriveListFromDb() {
 
 		ArrayList<Employee> list = new ArrayList<>();
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps1 = con.prepareStatement(constantdb.STR_Emp_GETALL);
 
-		ResultSet resultSet = null;
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps1 = con.prepareStatement(constantdb.STR_Emp_GETALL);
+				ResultSet resultSet = ps1.executeQuery();) {
 
-		resultSet = ps1.executeQuery();
-		
-		while (resultSet.next()) {
-			Employee u = new Employee();
-			u.setId(resultSet.getInt(1));
-			u.setName(resultSet.getString(2));
-			u.setEmail(resultSet.getString(3));
-			u.setPassword(resultSet.getString(4));
-			u.setMobno(resultSet.getLong(5));
+			while (resultSet.next()) {
+				Employee u = new Employee();
+				u.setId(resultSet.getInt(1));
+				u.setName(resultSet.getString(2));
+				u.setEmail(resultSet.getString(3));
+				u.setPassword(resultSet.getString(4));
+				u.setMobno(resultSet.getLong(5));
 
-			list.add(u);
+				list.add(u);
+			}
+		} catch (Exception e) {
 		}
 		return list;
 
 	}
 
-	public static Map<String, String> deletelibrarian(Employee lib) throws Exception {
-		System.out.println("in  delete method ");
+	public static Map<String, String> deleteEmployees(Employee emp) {
 
 		Map<String, String> mp = new HashMap<>();
 
-		int status = 0;
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_DELETE);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_DELETE);) {
+			int status = 0;
 
-		ps.setObject(1, lib.getId());
+			ps.setObject(1, emp.getId());
 
-		status = ps.executeUpdate();
+			status = ps.executeUpdate();
 
-		if (status == 1) {
+			if (status == 1) {
 
-			mp.put("Msg", " Delete successfully");
+				mp.put("Msg", " Delete successfully");
 
-		} else {
-			mp.put("Msg", "Error");
+			} else {
+				mp.put("Msg", "Error");
+			}
+
+		} catch (Exception e) {
+
 		}
 
 		return mp;
 
 	}
 
-	public static Map<String, String> update(Employee lib) {
+	public static Map<String, String> updateEmployees(Employee emp) {
 		Map<String, String> mapobject = new HashMap<String, String>();
 
-		int status = 0;
-		try {
-			Connection con = DBCon.getConnection();
-			PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_UPDATE);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_Emp_UPDATE);) {
+			int status = 0;
 
-			ps.setString(1, lib.getName());
-			ps.setString(2, lib.getEmail());
-			ps.setString(3, lib.getPassword());
-			ps.setLong(4, lib.getMobno());
-			ps.setInt(5, lib.getId());
+			ps.setString(1, emp.getName());
+			ps.setString(2, emp.getEmail());
+			ps.setString(3, emp.getPassword());
+			ps.setLong(4, emp.getMobno());
+			ps.setInt(5, emp.getId());
 
 			status = ps.executeUpdate();
 			if (status == 1) {
@@ -179,83 +190,80 @@ public class DaoLayer {
 
 				mapobject.put("status", "Error");
 			}
-			con.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+
+		} catch (Exception e) {
 		}
 
 		return mapobject;
 
 	}
 
-	public static ArrayList<Drives> getDriveList() throws ClassNotFoundException, SQLException {
+	public static ArrayList<Drives> getDriveList() {
+
 		ArrayList<Drives> list = new ArrayList<>();
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps1 = con.prepareStatement(constantdb.STR_drives_GETALL);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps1 = con.prepareStatement(constantdb.STR_drives_GETALL);
+				ResultSet rs = ps1.executeQuery();) {
+			while (rs.next()) {
+				Drives u = new Drives();
+				u.setDriveId(rs.getInt(1));
+				u.setCname(rs.getString(2));
+				u.setDriveDate(rs.getString(3));
+				u.setPosition(rs.getString(4));
+				u.setPackageOffered(rs.getInt(5));
+				u.setVacanciesAvailable(rs.getInt(6));
+				u.setLocation(rs.getString(7));
+				u.setContactPersonDetails(rs.getString(8));
+				u.setEmail(rs.getString(9));
 
-		ResultSet rs = null;
+				list.add(u);
+			}
 
-		rs= ps1.executeQuery();
-		while (rs.next()) 
-		{
-			Drives u = new Drives();
-			u.setDriveId(rs.getInt(1));
-			u.setCname(rs.getString(2));
-			u.setDriveDate(rs.getString(3));
-			u.setPosition(rs.getString(4));
-			u.setPackageOffered(rs.getInt(5));
-			u.setVacanciesAvailable(rs.getInt(6));
-			u.setLocation(rs.getString(7));
-			u.setContactPersonDetails(rs.getString(8));
-			u.setEmail(rs.getString(9));
-			
-			list.add(u);
+		} catch (Exception e) {
+
 		}
+
 		return list;
 	}
 
-	public static Map<String, String> deletedrive(Drives lib) throws ClassNotFoundException, SQLException {
-		System.out.println("in  delete method ");
+	public static Map<String, String> deletedrive(Drives lib) {
 
 		Map<String, String> mp = new HashMap<>();
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement("delete from drivedetails where id=?");) {
+			int status = 0;
+			ps.setObject(1, lib.getDriveId());
 
-		int status = 0;
-		Connection con = DBCon.getConnection();
-		PreparedStatement ps = con.prepareStatement("delete from drivedetails where id=?");
+			status = ps.executeUpdate();
 
-		ps.setObject(1,lib.getDriveId());
+			if (status == 1) {
+				mp.put("Msg", "Delete successfully");
+			} else {
+				mp.put("Msg", "Error");
+			}
 
-		status = ps.executeUpdate();
+		} catch (Exception e) {
 
-		if (status == 1)
-		{
-			mp.put("Msg", "Delete successfully");
-		} 
-		else
-		{
-			mp.put("Msg", "Error");
 		}
-
 		return mp;
 
 	}
 
-	public static Map<String, String> updatedrive(Drives lib) {
+	public static Map<String, String> updateDrive(Drives dr) {
 		Map<String, String> mapobject = new HashMap<String, String>();
 
-		int status = 0;
-		try {
-			Connection con = DBCon.getConnection();
-			PreparedStatement ps = con.prepareStatement(constantdb.STR_drive_UPDATE);
+		try (Connection con = DBCon.getConnection();
+				PreparedStatement ps = con.prepareStatement(constantdb.STR_drive_UPDATE);) {
+			int status = 0;
 
-			ps.setString(1, lib.getCname());
-			ps.setString(2, lib.getDriveDate());
-			ps.setString(3, lib.getPosition());
-			ps.setInt(4, lib.getPackageOffered());
-			ps.setInt(5, lib.getVacanciesAvailable());
-			ps.setString(6, lib.getLocation());
-			ps.setString(7, lib.getContactPersonDetails());
-			ps.setInt(8, lib.getDriveId());
+			ps.setString(1, dr.getCname());
+			ps.setString(2, dr.getDriveDate());
+			ps.setString(3, dr.getPosition());
+			ps.setInt(4, dr.getPackageOffered());
+			ps.setInt(5, dr.getVacanciesAvailable());
+			ps.setString(6, dr.getLocation());
+			ps.setString(7, dr.getContactPersonDetails());
+			ps.setInt(8, dr.getDriveId());
 			status = ps.executeUpdate();
 			if (status == 1) {
 
@@ -264,9 +272,9 @@ public class DaoLayer {
 
 				mapobject.put("status", "Error");
 			}
-			con.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+
+		} catch (Exception e) {
+
 		}
 
 		return mapobject;
