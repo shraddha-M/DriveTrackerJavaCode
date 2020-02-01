@@ -1,4 +1,4 @@
-package com.Drive.pojo;
+package com.drivetracker.pojo;
 
 public class Drives {
 	private int driveId;
@@ -10,8 +10,6 @@ public class Drives {
 	private String location;
 	private String contactPersonDetails;
 	private String email;
-	
-	
 
 	public String getEmail() {
 		return email;
